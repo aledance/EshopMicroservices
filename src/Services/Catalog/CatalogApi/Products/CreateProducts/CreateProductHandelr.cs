@@ -1,24 +1,27 @@
-﻿namespace CatalogApi.Products.CreateProduct;
-
-
-using BuildingBlocks.CQRS;
+﻿using BuildingBlocks.CQRS;
 using CatalogApi.Modls;
-using MediatR;
-public record CreateProductCommand(Guid Id, string Name, List<string> Category, string Description, string ImageFile, decimal Price) :
-    ICommand<CreateProductResult>, IRequest<CreateProductResult>;
 
-    public record CreateProductResult(Guid Id);
 
-// La clase 'CreateProductCommandHandelr' es interna, lo que significa que solo es accesible dentro del ensamblado actual.
+namespace Catalog.API.Products.CreateProduct;
 
-internal class CreateProductCommandHandelr :
-    ICommandHandler<CreateProductCommand, CreateProductResult>, IRequestHandler<CreateProductCommand, CreateProductResult>
-{
+public record CreateProductCommand(string Name, List<string> Category, string Description, string ImageFile, decimal Price)
+    : ICommand<CreateProductResult>, IRequest<CreateProductResult>; // Implement IRequest<CreateProductResult>
+public record CreateProductResult(Guid Id);
+
+
+
+internal class CreateProductCommandHandler
+
+    : ICommandHandler<CreateProductCommand, CreateProductResult>, IRequestHandler<CreateProductCommand, CreateProductResult> // Implement IRequestHandler
+{ 
     public async Task<CreateProductResult> Handle(CreateProductCommand command, CancellationToken cancellationToken)
     {
+        //create Product entity from command object
+        //save to database
+        //return CreateProductResult result               
+
         var product = new Product
         {
-            Id = command.Id,
             Name = command.Name,
             Category = command.Category,
             Description = command.Description,
@@ -26,9 +29,7 @@ internal class CreateProductCommandHandelr :
             Price = command.Price
         };
 
-        // guardar la base de datos
-        // devolver el resultado
+        //return result
         return new CreateProductResult(product.Id);
     }
 }
-

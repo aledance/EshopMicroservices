@@ -1,37 +1,34 @@
-﻿
-using Carter;
-using Mapster;
-using MediatR;
+﻿namespace Catalog.API.Products.CreateProduct;
 
-namespace CatalogApi.Products.CreateProducts;
-    public record CreateProductRequest(Guid Id, string Name, List<string> Category, string Description, string ImageFile, decimal Price); 
-    public record CreateProductResponse(Guid Id);
-    
-    public record CreateProductCommand(Guid Id, string Name, List<string> Category, string Description, string ImageFile, decimal Price) : IRequest<CreateProductResponse>;
+public record CreateProductRequest(string Name, List<string> Category, string Description, string ImageFile, decimal Price);
 
+public record CreateProductResponse(Guid Id);
 
-
-public class CreateProductendpoint : ICarterModule
+public class CreateProductEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
+    // Add the routes for the endpoint
     {
-        app.MapPost("/products", async (CreateProductRequest request, IMediator mediator) =>
-        {
-            var command = request.Adapt<CreateProductCommand>();
-            app.MapPost("/products", async (CreateProductRequest request, IMediator mediator) =>
+        app.MapPost("/products",
+            async (CreateProductRequest request, ISender sender) =>
             {
                 var command = request.Adapt<CreateProductCommand>();
-                var result = await mediator.Send(command);
-                var response = result.Adapt<CreateProductResponse>();
-                return Results.Created($"/products/{response.Id}", response);
-            });
-              
 
-        });
+                var result = await sender.Send<CreateProductResult>(command);
+
+                var response = result.Adapt<CreateProductResponse>();
+
+                return Results.Created($"/products/{response.Id}", response);
+
+            })
+        .WithName("CreateProduct") // Name of the endpoint
+        .Produces<CreateProductResponse>(StatusCodes.Status201Created) // 201 Created
+        .ProducesProblem(StatusCodes.Status400BadRequest) // 400 Bad Request
+        .WithSummary("Create Product") // Summary of the endpoint
+        .WithDescription("Create Product"); // Description of the endpoint
     }
 }
 
-    
 
 
 
